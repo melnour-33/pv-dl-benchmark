@@ -1,0 +1,102 @@
+#!/bin/bash
+#SBATCH --job-name=PV_baseline
+#SBATCH --time=5:0:00 --mem=12G
+#SBATCH --ntasks=1 --nodes=1 --cpus-per-task=1
+#SBATCH --output=out.%j --error=error.%j
+#SBATCH --partition=gpu --gres=gpu:a100:1  --account=<YOUR_ACCOUNT>
+# ==============================================================================
+# job_baseline.job   --   dBG-FALSE baseline, ONE model per submission, itr=5
+#
+# Differences from the stock TSLib job files:
+#   * dataset AND features are now arguments, so a single file covers UK /
+#     Miryang / Germany and BOTH univariate (S) and multivariate (MS).
+#   * --itr 5  (5 seeds -> mean +/- std; run.py was patched to seed each iter).
+#   * added the paper models that were missing from the dispatch:
+#     iTransformer, TiDE, LightTS.
+#   * --des 'Rev' so the revision runs are easy to aggregate (--tag Rev).
+#
+# Each `sbatch` of this file trains exactly ONE model, for one horizon, one
+# feature mode, for 5 seeds. The full list of submissions is in scripts/sbatch_commands.txt.
+#
+# USAGE:  sbatch job_baseline.job <dataset> <model> <seq_len> <pred_len> <features>
+#   e.g.  sbatch scripts/job_baseline.job UK PatchTST 120 24 MS
+#         sbatch scripts/job_baseline.job UK PatchTST 120 24 S
+# ==============================================================================
+
+# ---- environment (EDIT for your cluster) -------------------------------------
+# The paper runs used the TAMU HPRC module stack below on one A100 GPU:
+#   ml GCC/12.3.0 OpenMPI/4.1.5 PyTorch-Geometric/2.5.0-PyTorch-2.1.2-CUDA-12.1.1
+# Load your own modules or conda environment here (see requirements.txt).
+
+# Weights & Biases logging is not needed to reproduce the results.
+export WANDB_MODE=disabled
+
+# source activate <your_env>
+
+cd "${SLURM_SUBMIT_DIR:-.}"   # submit from the repository root
+
+# ------------------------------- arguments ------------------------------------
+dataset=$1        # UK | Miryang | Germany
+model_name=$2     # any paper model (see scripts/sbatch_commands.txt)
+seq_len=$3
+pred_len=$4
+features=${5:-MS} # MS (multivariate->target) or S (univariate)
+
+# multivariate uses 5 inputs (PV + 4 meteo); univariate uses 1. c_out is always 1.
+if [ "$features" == "S" ]; then
+  enc_in=1; dec_in=1
+else
+  enc_in=5; dec_in=5
+fi
+c_out=1
+
+# ---------------------- per-model extra hyper-parameters ----------------------
+# Settings used for the paper runs. iTransformer, TiDE and LightTS
+# use standard TSLib settings.
+# ITR defaults to 5 (5 seeds -> mean/std). ARIMA is deterministic and has no
+# trainable parameters, so it runs a single iteration with a single epoch.
+ITR=5
+case "$model_name" in
+  TimesNet)                  EXTRA="--e_layers 2 --d_layers 1 --factor 3 --d_model 16 --d_ff 32" ;;
+  PatchTST)                  EXTRA="--e_layers 1 --d_layers 1 --factor 3 --n_heads 2" ;;
+  TimeXer)                   EXTRA="--e_layers 1 --factor 3 --d_model 256 --batch_size 4 --patch_len 12" ;;
+  Nonstationary_Transformer) EXTRA="--e_layers 2 --d_layers 1 --factor 3 --p_hidden_dims 256 256 --p_hidden_layers 2 --d_model 128" ;;
+  iTransformer)              EXTRA="--e_layers 2 --d_layers 1 --factor 3 --d_model 128 --d_ff 128" ;;
+  TiDE)                      EXTRA="--e_layers 2 --d_layers 2 --factor 3 --d_model 256 --d_ff 256" ;;
+  ARIMA)                     EXTRA="--train_epochs 1"; ITR=1 ;;
+  DLinear|FEDformer|Transformer|Crossformer|TSMixer|Autoformer|FiLM|LightTS)
+                             EXTRA="--e_layers 2 --d_layers 1 --factor 3" ;;
+  *)                         EXTRA="--e_layers 2 --d_layers 1 --factor 3" ;;
+esac
+
+# ARIMA is only valid in univariate (S) or multivariate->target (MS) modes; in
+# plain M mode it would leave non-target channels at zero and corrupt metrics.
+if [ "$model_name" == "ARIMA" ] && [ "$features" == "M" ]; then
+  echo "ERROR: run ARIMA with features S or MS, not M."; exit 1
+fi
+
+echo "=============================================="
+echo "BASELINE (no dBG) | Dataset: $dataset | Model: $model_name"
+echo "Features: $features | Seq_len: $seq_len | Pred_len: $pred_len | itr: $ITR"
+echo "enc_in: $enc_in | EXTRA: $EXTRA"
+echo "=============================================="
+
+python -u run.py \
+  --job_id "$SLURM_JOB_ID" \
+  --task_name long_term_forecast \
+  --is_training 1 \
+  --root_path ./dataset/${dataset}/ \
+  --data_path ${dataset}.csv \
+  --model_id "${dataset}_${seq_len}_${pred_len}" \
+  --model $model_name \
+  --data $dataset \
+  --features $features \
+  --seq_len $seq_len \
+  --label_len 6 \
+  --pred_len $pred_len \
+  --enc_in $enc_in \
+  --dec_in $dec_in \
+  --c_out $c_out \
+  --des "${DES:-Rev}" \
+  --itr $ITR \
+  $EXTRA

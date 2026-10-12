@@ -1,0 +1,37 @@
+{
+  "1": {
+    "filename": "30.096_G_50kW.csv.csv",
+    "capacity": 30.096,
+    "data_points": 648
+  },
+  "2": {
+    "filename": "62.415_E_69kW.csv.csv",
+    "capacity": 62.415,
+    "data_points": 13680
+  },
+  "3": {
+    "filename": "52.102_F_64kW.csv.csv",
+    "capacity": 52.102,
+    "data_points": 15528
+  },
+  "4": {
+    "filename": "75.57_D_89kW.csv.csv",
+    "capacity": 75.57,
+    "data_points": 15360
+  },
+  "5": {
+    "filename": "101.286_C_99kW.csv.csv",
+    "capacity": 101.286,
+    "data_points": 6792
+  },
+  "6": {
+    "filename": "533.6_B_658kW.csv.csv",
+    "capacity": 533.6,
+    "data_points": 16248
+  },
+  "7": {
+    "filename": "826.165_A_999kW.csv.csv",
+    "capacity": 826.165,
+    "data_points": 15840
+  }
+}

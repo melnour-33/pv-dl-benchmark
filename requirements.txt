@@ -1,0 +1,22 @@
+# Versions of the environment used for the local runs (Python 3.10).
+# The HPRC runs used PyTorch 2.1.2 / CUDA 12.1 with PyTorch Geometric 2.5.0.
+torch==2.4.1
+torch-geometric==2.6.1
+numpy==1.23.5
+pandas==1.5.3
+scipy==1.15.3
+scikit-learn==1.2.2
+statsmodels==0.14.6
+pmdarima==2.1.1
+sktime==0.16.1
+einops==0.8.0
+reformer-pytorch==1.4.4
+local-attention==1.9.14
+matplotlib==3.7.5
+joblib==1.5.3
+tqdm==4.64.1
+sympy==1.11.1
+networkx==3.4.2
+patool==1.12
+PyWavelets>=1.4,<1.7
+wandb==0.19.11

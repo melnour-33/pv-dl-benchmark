@@ -1,0 +1,47 @@
+{
+  "1": {
+    "filename": "8.784999999999854_DE_KN_residential4_pv.csv",
+    "capacity": 8.784999999999854,
+    "data_points": 31080
+  },
+  "2": {
+    "filename": "6.055000000000291_DE_KN_industrial3_pv_facade.csv",
+    "capacity": 6.055000000000291,
+    "data_points": 25920
+  },
+  "3": {
+    "filename": "4.170000000000073_DE_KN_industrial1_pv_2.csv",
+    "capacity": 4.170000000000073,
+    "data_points": 28896
+  },
+  "4": {
+    "filename": "8.197000000000116_DE_KN_residential1_pv.csv",
+    "capacity": 8.197000000000116,
+    "data_points": 28656
+  },
+  "5": {
+    "filename": "7.64600000000064_DE_KN_residential6_pv.csv",
+    "capacity": 7.64600000000064,
+    "data_points": 31800
+  },
+  "6": {
+    "filename": "4.75_DE_KN_industrial1_pv_1.csv",
+    "capacity": 4.75,
+    "data_points": 28824
+  },
+  "7": {
+    "filename": "3.845999999999549_DE_KN_residential3_pv.csv",
+    "capacity": 3.845999999999549,
+    "data_points": 32640
+  },
+  "8": {
+    "filename": "11.100999999998749_DE_KN_industrial3_pv_roof.csv",
+    "capacity": 11.100999999998749,
+    "data_points": 26280
+  },
+  "9": {
+    "filename": "14.599999999998545_DE_KN_industrial2_pv.csv",
+    "capacity": 14.599999999998545,
+    "data_points": 24744
+  }
+}
